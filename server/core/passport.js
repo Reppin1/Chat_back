@@ -4,7 +4,6 @@ const JwtStrategy = require('passport-jwt').Strategy
 const {User} = require('../../models')
 const dotenv = require("dotenv");
 const {ExtractJwt} = require("passport-jwt");
-// const createJwtToken = require("../../utils/createJwtToken");
 
 dotenv.config({
   path: '.env',
@@ -16,8 +15,19 @@ const opts = {
 };
 
 passport.use('jwt',
-  new JwtStrategy(opts, function (jwt_payload, done) {
-    done(null, jwt_payload.data);
+  new JwtStrategy(opts, async (jwt_payload, done) => {
+    try {
+      const user = await User.findOne({where: {
+          email: jwt_payload.user
+        }})
+      if(user) {
+        done(null, user);
+      } else {
+        done(null, false)
+      }
+    } catch (e) {
+      console.log(e)
+    }
   }),
 );
 
@@ -26,12 +36,11 @@ passport.use('github', new GitHubStrategy({
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
     callbackURL: "http://localhost:4000/auth/github/callback"
   },
-  (accessToken, refreshToken, profile, done) => {
+  (_, __, profile, done) => {
     try {
       const userData = {
-        firstName: profile.displayName.split(' ')[0],
-        lastName: profile.displayName.split(' ')[1],
-        avatarUrl: profile.photos?.[0].value || '',
+        fullName: profile.displayName || '',
+        avatarUrl: profile.photos?.[0].value,
         isActive: false,
         password: '',
         email: '',
@@ -50,7 +59,7 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(user, done) {
-  done(null, user);
+  done(null, user)
 });
 
 module.exports = passport
