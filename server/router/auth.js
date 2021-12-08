@@ -1,5 +1,4 @@
 const Router = require('express').Router
-const passport = require('../core/passport')
 const AuthController = require("../Controllers/AuthController");
 
 const router = new Router()
@@ -10,8 +9,10 @@ router.get('/code', AuthController.sendCode)
 
 router.get('/code/activate', AuthController.activate)
 
-router.get('/me', AuthController.getMe)
+router.post('/login', AuthController.login)
 
-router.get('/test', passport.authenticate('jwt', {session: false}), AuthController.test)
+router.get('/logout', AuthController.logout)
+
+router.get('/me', AuthController.getMe)
 
 module.exports = router

@@ -23,6 +23,36 @@ class AuthController {
     }
   }
 
+  async logout(req, res) {
+    try {
+      res.clearCookie('token')
+      res.send()
+    } catch (e) {
+      console.log(e)
+      res.status(500).json({message: 'Ошибка при выходе'})
+    }
+  }
+
+  async login(req, res) {
+    const email = req.body.email
+    const password = req.body.password
+    try {
+      const whereQuery = {email: email, password: password};
+      const findUser = await User.findOne({
+        where: whereQuery
+      })
+
+      if(!findUser) {
+        return res.status(400).json({message: `Пользователь с email: ${email} не найден`})
+      }
+      const token = createJwtToken(email)
+      res.cookie('token', token, {httpOnly: true})
+      res.send({message: "вы вошли"})
+    } catch (e) {
+      res.status(500).json({message: 'Error sending sms(Ошибка при отправке)'})
+    }
+  }
+
   async getMe(req, res) {
     const token = req.cookies.token
     try {
@@ -33,8 +63,9 @@ class AuthController {
             email: user
           }
         })
-        res.json(userInfo)
+        return res.json(userInfo)
       }
+      res.status(401).json('Unauthorized')
     } catch (e) {
       console.log(e)
     }
@@ -61,17 +92,13 @@ class AuthController {
         avatarUrl: req.body.avatarUrl,
         isActive: false,
       }
-      await User.create(user)
       const token = createJwtToken(email)
-      res.cookie('token', token, {httpOnly: true})
-      res.status(201).json({message: 'данные отправлены в бд'});
+      await User.create(user)
+      res.cookie('token', token, {maxAge: 3600 * 24 * 30 ,httpOnly: true})
+      res.status(201).json(user);
     } catch (e) {
       console.log(e)
     }
-  }
-
-  async test(req, res) {
-    res.json({message: 'Test INFo'})
   }
 
   async sendCode(req, res) {

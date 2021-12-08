@@ -4,7 +4,8 @@ const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv')
 const passport = require('./core/passport')
 const AuthController = require('./Controllers/AuthController')
-const router = require('./router/index')
+const authRouter = require('./router/auth')
+const dialogRouter = require('./router/message')
 require('./core/database')
 
 dotenv.config({
@@ -21,12 +22,9 @@ app.use(cors({
   credentials: true
 }));
 app.use(cookieParser())
-app.use('/auth', router)
+app.use('/auth', authRouter)
+// app.use('/dialog', dialogRouter)
 app.use(passport.initialize());
-
-app.get('/', function (req, res) {
-  res.send('Туда сюда ЧИХ ПЫХ')
-})
 
 app.get('/auth/github', passport.authenticate('github'));
 
