@@ -1,7 +1,7 @@
 const passport = require('passport');
 const GitHubStrategy = require('passport-github').Strategy;
 const JwtStrategy = require('passport-jwt').Strategy
-const {User} = require('../../models')
+const {User} = require('../../models/user')
 const dotenv = require("dotenv");
 const {ExtractJwt} = require("passport-jwt");
 
@@ -9,24 +9,27 @@ dotenv.config({
   path: '.env',
 });
 
+const cookieExtractor = function (req) {
+  let token = null;
+  if (req && req.cookies) {
+    token = req.cookies['token'];
+  }
+  return token;
+};
+
 const opts = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: cookieExtractor,
   secretOrKey: process.env.JWT_SECRET_KEY,
 };
 
 passport.use('jwt',
   new JwtStrategy(opts, async (jwt_payload, done) => {
-    try {
-      const user = await User.findOne({where: {
-          email: jwt_payload.user
-        }})
-      if(user) {
-        done(null, user);
-      } else {
-        done(null, false)
-      }
-    } catch (e) {
-      console.log(e)
+    const user = await User.findOne({where: {email: jwt_payload.user}})
+    if(user) {
+      return done(null, user)
+    }
+    else {
+      return done(null, false)
     }
   }),
 );
@@ -54,11 +57,11 @@ passport.use('github', new GitHubStrategy({
   }
 ));
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function (user, done) {
   done(null, user);
 });
 
-passport.deserializeUser(function(user, done) {
+passport.deserializeUser(function (user, done) {
   done(null, user)
 });
 

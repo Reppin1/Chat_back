@@ -5,7 +5,9 @@ const dotenv = require('dotenv')
 const passport = require('./core/passport')
 const AuthController = require('./Controllers/AuthController')
 const authRouter = require('./router/auth')
-const dialogRouter = require('./router/message')
+const dialogRouter = require('./router/dialog')
+const messageRouter = require('./router/message')
+const profileRouter = require('./router/profile')
 require('./core/database')
 
 dotenv.config({
@@ -19,12 +21,14 @@ const app = express();
 app.use(express.json())
 app.use(cors({
   origin: 'http://localhost:3000',
-  credentials: true
+  credentials: true,
 }));
 app.use(cookieParser())
-app.use('/auth', authRouter)
-// app.use('/dialog', dialogRouter)
 app.use(passport.initialize());
+app.use('/auth', authRouter)
+app.use('/', dialogRouter)
+app.use('/', messageRouter)
+app.use('/', profileRouter)
 
 app.get('/auth/github', passport.authenticate('github'));
 
@@ -32,7 +36,7 @@ app.get('/auth/github/callback',
   passport.authenticate('github', {failureRedirect: '/login'}),
   (req, res) => {
     AuthController.authCallback(req, res)
-  }
+  },
 )
 
 app.listen(PORT, () => {

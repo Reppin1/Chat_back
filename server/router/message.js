@@ -1,10 +1,12 @@
-const DilogController = require('../Controllers/DialogController')
+const MessageController = require('../Controllers/MessageController')
+const passport = require("../core/passport");
 const Router = require('express').Router
+
 
 const router = new Router()
 
-router.get('/', DilogController.getDialog)
+router.post('/message', passport.authenticate('jwt', { session: false }), MessageController.createMessage)
 
-router.get('/:id')
+router.get('/message', passport.authenticate('jwt', { session: false }), MessageController.getMessages)
 
-router.post('/message')
+module.exports = router

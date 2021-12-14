@@ -1,9 +1,8 @@
-const {User} = require('../../models')
-const {Code} = require('../../models')
+const {User} = require('../../models/user')
+const {Code} = require('../../models/code')
 const generateRandomCode = require('../../utils/generateRandomCode')
 const MailService = require('../service/mail-service')
 const createJwtToken = require("../../utils/createJwtToken");
-const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 
 dotenv.config({
@@ -54,18 +53,24 @@ class AuthController {
   }
 
   async getMe(req, res) {
-    const token = req.cookies.token
+    const user = req.user
     try {
-      if(token) {
-        const {user} = jwt.verify(token, process.env.JWT_SECRET_KEY)
+      if(user) {
         const userInfo = await User.findOne({
           where: {
-            email: user
+            email: user.email
           }
         })
-        return res.json(userInfo)
+        const sendUser = {
+          id: userInfo.id,
+          firstName: userInfo.firstName,
+          lastName: userInfo.lastName,
+          email: userInfo.email,
+          avatarUrl: userInfo.avatarUrl,
+          isActive: userInfo.isActive
+        }
+        return res.json(sendUser)
       }
-      res.status(401).json('Unauthorized')
     } catch (e) {
       console.log(e)
     }
@@ -94,7 +99,7 @@ class AuthController {
       }
       const token = createJwtToken(email)
       await User.create(user)
-      res.cookie('token', token, {maxAge: 3600 * 24 * 30 ,httpOnly: true})
+      res.cookie('token', token, {maxAge: 3600 * 24 * 30 * 1000 ,httpOnly: true})
       res.status(201).json(user);
     } catch (e) {
       console.log(e)
@@ -134,8 +139,7 @@ class AuthController {
   }
 
   async activate(req, res) {
-    const {token} = req.cookies
-    const {user} = jwt.verify(token, process.env.JWT_SECRET_KEY)
+    const user = req.user.email
     const code = req.query.code;
 
     if (!code) {
