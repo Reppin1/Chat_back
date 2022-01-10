@@ -67,7 +67,8 @@ class AuthController {
           lastName: userInfo.lastName,
           email: userInfo.email,
           avatarUrl: userInfo.avatarUrl,
-          isActive: userInfo.isActive
+          isActive: userInfo.isActive,
+          aboutMe: userInfo.aboutMe,
         }
         return res.json(sendUser)
       }

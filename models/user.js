@@ -26,6 +26,20 @@ const User = sequelize.define('User', {
   isActive: {
     type: Sequelize.BOOLEAN
   },
+  aboutMe: {
+   type: Sequelize.STRING(1023)
+  },
+  isOnline: {
+    type: Sequelize.BOOLEAN,
+    defaultValue: false
+  },
+  socket: {
+    type: Sequelize.STRING,
+  },
+  lastSeen: {
+    type: Sequelize.DATE,
+    defaultValue: new Date()
+  },
   createdAt: {
     allowNull: false,
     type: Sequelize.DATE

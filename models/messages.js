@@ -11,11 +11,11 @@ const Message = sequelize.define('Messages', {
     allowNull: false
   },
   text: {
-    type: Sequelize.STRING,
+    type: Sequelize.STRING(1023),
   },
   read: {
     type: Sequelize.BOOLEAN,
-    default: false
+    defaultValue: false
   }
 })
 

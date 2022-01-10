@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv')
+const {createServer} = require('http');
+const {Server} = require('socket.io');
 const passport = require('./core/passport')
 const AuthController = require('./Controllers/AuthController')
 const authRouter = require('./router/auth')
@@ -25,6 +27,22 @@ app.use(cors({
 }));
 app.use(cookieParser())
 app.use(passport.initialize());
+
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+})
+
+require('./core/socket')(io);
+
 app.use('/auth', authRouter)
 app.use('/', dialogRouter)
 app.use('/', messageRouter)
@@ -39,6 +57,19 @@ app.get('/auth/github/callback',
   },
 )
 
-app.listen(PORT, () => {
+
+// const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
+// io.use(wrap(passport.initialize()));
+// io.use(wrap(passport.session()));
+//
+// io.use((socket, next) => {
+//   if (socket.request.user) {
+//     next();
+//   } else {
+//     next(new Error('unauthorized'))
+//   }
+// });
+
+server.listen(PORT, () => {
   console.log(`Server RUNNED! on ${PORT} PORT`)
 });
