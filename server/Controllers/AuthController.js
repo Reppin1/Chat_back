@@ -73,7 +73,7 @@ class AuthController {
         return res.json(sendUser)
       }
     } catch (e) {
-      console.log(e)
+      return res.json(e)
     }
   }
 

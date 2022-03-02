@@ -1,4 +1,5 @@
 const {User} = require('../../models/user')
+const {Message} = require('../../models/messages');
 const jwt = require('jsonwebtoken');
 
 module.exports = function (io) {
@@ -12,7 +13,11 @@ module.exports = function (io) {
       const {user} = jwt.verify(token, process.env.JWT_SECRET_KEY)
       await User.update({socket: '', lastSeen: new Date(), isOnline: false}, {where: {email: user}})
     })
-  })
+  },
+  // io.on('SERVER:READ_MESSAGE', async (message) => {
+  //   await Message.update({read: true}, {where : {id: message.id}})
+  // })
+  )
 };
 
 function parseCookies(request) {

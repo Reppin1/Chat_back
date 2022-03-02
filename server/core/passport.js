@@ -42,8 +42,8 @@ passport.use('github', new GitHubStrategy({
   (_, __, profile, done) => {
     try {
       const userData = {
-        fullName: profile.displayName || '',
-        avatarUrl: profile.photos?.[0].value,
+        fullName: profile?.displayName || '',
+        avatarUrl: profile?.photos?.[0].value,
         isActive: false,
         password: '',
         email: '',

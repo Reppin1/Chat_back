@@ -57,19 +57,6 @@ app.get('/auth/github/callback',
   },
 )
 
-
-// const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
-// io.use(wrap(passport.initialize()));
-// io.use(wrap(passport.session()));
-//
-// io.use((socket, next) => {
-//   if (socket.request.user) {
-//     next();
-//   } else {
-//     next(new Error('unauthorized'))
-//   }
-// });
-
 server.listen(PORT, () => {
   console.log(`Server RUNNED! on ${PORT} PORT`)
 });
